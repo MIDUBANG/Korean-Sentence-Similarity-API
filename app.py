@@ -56,18 +56,18 @@ def nlp():
     best_dist = 65535
     best_i = None
 
-    res = {}
+    res = []
     for i in range(0, num_samples):
         post_vec = X.getrow(i)
         d = dist_raw(post_vec, new_post_vec)
 
-        res[i] = {'i' : i, 'distance' : d, 'content': contents[i]}
+        res.append({'i' : i, 'distance' : d, 'content': contents[i]})
         print(d, best_dist)
         if d < best_dist:
             best_dist = d
             best_i = i
 
-    res[1000] = {'best_i':best_i,'best_distance' :best_dist, 'content':contents[best_i], 'target':new_post}
+    res.append({'best_i':best_i,'best_distance' :best_dist, 'content':contents[best_i], 'target':new_post})
     return jsonify(res)
 
 
