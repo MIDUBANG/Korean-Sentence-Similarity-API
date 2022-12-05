@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask,  render_template
 from flask import request, jsonify
 
 from konlpy.tag import Okt
@@ -16,6 +16,9 @@ app = Flask(__name__)
 
 CORS(app)
 
+@app.route("/") 
+def home():
+    return render_template("index.html")
 
 def dist_raw(v1, v2):
     delta = v1 - v2
