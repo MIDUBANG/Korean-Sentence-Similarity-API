@@ -58,7 +58,7 @@ def nlp():
     #(2, 0) 1.0
 
     #new_post = [input['text']]
-    new_post = ['반려동물을 키우지 않는다. 금지','입력된 문장임','입력된 문장임'] # ✅ 입력으로 들어온 특약 배열
+    new_post = ['반려동물을 키우지 않는다. 금지','입력된 문장임','입력된 문장임','입력된 문장임'] # ✅ 입력으로 들어온 특약 배열
     new_post_tokens = [t.morphs(row) for row in new_post] # [['입력', '된', '문', '장임'], ['두번째', '문장'], ['세번', '째', '분장']]
 
     new_post_for_vectorize = []
@@ -81,22 +81,20 @@ def nlp():
     # ✅ 거리 계산
 
     d = 0
-    for i in range(0, num_samples): # num_samples : 후보 케이스 개수 (3)
-        post_vec = X.getrow(i)
-        for j in range(3): # (3개)
+    min = 100
+    min_index = 0
+    res = []
+    
+    for j in range(len(new_post)): # 새로 들어온거
+        for i in range(0, num_samples):
+            post_vec = X.getrow(i)
+
             d = dist_raw(post_vec, new_post_vec[j])
-            #d = dist_raw(post_vec, new_post_vec) # 거리
-            #res.append({'i' : i, 'distance' : d, 'content': contents[i]})
-            print('i:',i,'j',j,'거리:',d)
-
-        res.append({'i' : i, 'distance' : 1, 'content': contents[i]})
-
-        '''
-        if d < best_dist:
-            best_dist = d
-            best_i = i
-        '''
-    res.append({'best_i':best_i,'best_distance' :best_dist, 'content':contents[best_i], 'target':new_post})
+            if min > d:
+                min = d
+                min_index = i
+        print(j,'번 문장과 가장 가까운 case는 ', min_index, '거리는 ',d )
+            
     return jsonify(res)
 
 
