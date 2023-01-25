@@ -61,8 +61,8 @@ def nlp():
 
     res = []
     for i in range(0, num_samples):
-        post_vec = X.getrow(i)
-        d = dist_raw(post_vec, new_post_vec)
+        post_vec = X.getrow(i) # 이건 여러개 
+        d = dist_raw(post_vec, new_post_vec) # new_post_vec 이건 한개 
 
         res.append({'i' : i, 'distance' : d, 'content': contents[i]})
         print(d, best_dist)
