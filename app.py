@@ -60,7 +60,6 @@ def get_best(case_num,input):
     # ['계약', '금지', '반려동물', '어쩌구', '임대', '임대차', '키우기', '해지']
     
 
-
     num_samples, num_features = X.shape 
     # X
     #(0, 0) 1.0
@@ -115,32 +114,83 @@ def get_best(case_num,input):
 
 
 @app.route('/api/nlp', methods=['POST'])
-
 def nlp():
+    input = (request.get_json())
+    contents = input['contents']
+    extraInfo = input['extraInfo']
 
-    input = ['반려동물을 키우지 않는다. 금지','월세 밀리면 퇴거합니다.','입주 후 생긴 하자는 임차인이 수리한다.']
+    print(contents)
+    print(extraInfo)
+
+    #contents = ['반려동물을 키우지 않는다. 금지','월세 밀리면 퇴거합니다.','입주 후 생긴 하자는 임차인이 수리한다.']
     
+
+    # ✅ in
     min_dis = 1000
     best_case_i = 999
-    answer = []
-
+    answer_in = []
     for i in range(3): # input 3개, 세번 돌린다. 
-
         for j in range(len(initialData)): # 보유 중인 case (3개 라고 가정)
-
-            sum_of_distance = get_best(j,[input[i]]) # 인풋 중 하나만
-        
+            sum_of_distance = get_best(j,[contents[i]]) # 인풋 중 하나만
             if min_dis > sum_of_distance:
                 min_dis = sum_of_distance
                 best_case_i = j
         print(best_case_i)
         min_dis = 1000
-        answer.append(best_case_i)
+        if min_dis < 0.7: # 거리 기준
+            answer_in.append(best_case_i)
 
-    print(answer)  # 0 2 1
+    # ✅ out
+    answer_out = []
 
-    return jsonify({'best case : ', best_case_i})
+    # 1) 공통 필수인데 안들어간 것
+    essential = [34,35,36,37,38]
+    for es in essential:
+        if not es in answer_in:
+            answer_out.append(es)
+  
 
+    # 2) 선택적
+    pet = extraInfo['pet']
+    loan = extraInfo['loan']
+    substitute = extraInfo['substitute']
+
+    if pet: # 반려 동물
+        if not 77 in answer_in:
+            answer_out.append(77)
+    if loan: # 전세 대출
+        if not 88 in answer_in:
+            answer_out.append(88)
+    if substitute: # 대리인
+        if not 99 in answer_in:
+            answer_out.append(99)
+    
+
+    # ✅ 복비 계산
+    answer_commission = 0 #복비 한도 계산한 값
+    is_expensive = False # 바가지?
+
+    monthly = extraInfo['monthly'] #월세or전세
+    commission = extraInfo['commission'] #복비
+    deposit = extraInfo['deposit'] #보증금 (전세금)
+    monthlyMoney = extraInfo['monthlyMoney'] #월세
+
+    # 한도 계산 없이
+    if monthly: #월세
+        if deposit + monthlyMoney*100 <= 50000000: #5천만원 이하면
+            answer_commission =(deposit + monthlyMoney*70)/100 * 0.4
+        else:
+            answer_commission = (deposit + monthlyMoney*100) / 100 * 0.4
+    else: #전세
+        if deposit < 50000000:
+            answer_commission= deposit / 100 * 0.4
+
+
+    if answer_commission < commission:
+        is_expensive = True # 바가지 당첨!
+
+
+    return jsonify({"in": answer_in,"out":answer_out, "answer_commission":answer_commission,"is_expensive":is_expensive})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000,debug=True)
