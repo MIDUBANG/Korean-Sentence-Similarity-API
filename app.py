@@ -167,28 +167,50 @@ def nlp():
     
 
     # ✅ 복비 계산
-    answer_commission = 0 #복비 한도 계산한 값
-    is_expensive = False # 바가지?
-
     monthly = extraInfo['monthly'] #월세or전세
     commission = extraInfo['commission'] #복비
     deposit = extraInfo['deposit'] #보증금 (전세금)
     monthlyMoney = extraInfo['monthlyMoney'] #월세
 
-    # 한도 계산 없이
+    # 1) 거래금액 Scale 계산하기 
     if monthly: #월세
         if deposit + monthlyMoney*100 <= 50000000: #5천만원 이하면
-            answer_commission =(deposit + monthlyMoney*70)/100 * 0.4
+            scale = deposit + monthlyMoney*70
         else:
-            answer_commission = (deposit + monthlyMoney*100) / 100 * 0.4
+            scale = deposit + monthlyMoney*100
     else: #전세
         if deposit < 50000000:
-            answer_commission= deposit / 100 * 0.4
+            scale= deposit
 
+    # 2) 거래금액에 따른 상한요율 rate, 한도액 limit 계산
+    if  scale < 50000000: #5천만원 미만 / 0.5 (rate) / 20만(limit)
+        rate = 0.005
+        limit = 200000
+    elif scale < 100000000: #5천 이상, 1억 미만 / 0.4 / 30만
+        rate = 0.004
+        limit = 300000
+    elif scale < 600000000: # 1억 이상, 6억 미만 / 0.3 / 없음
+        rate = 0.003
+        limit = float('inf')
+    elif scale < 1200000000: # 6억 이상, 12억 미만 / 0.4 / 없음
+        rate = 0.004
+        limit = float('inf')
+    elif scale < 1500000000: # # 1억 이상, 6억 미만 / 0.5 / 없음
+        rate = 0.005
+        limit = float('inf')
+    else: # 1억 이상, 6억 미만 / 0.6 / 없음
+        rate = 0.006
+        limit = float('inf')
 
+    # 3) 최대 복비 계산
+    answer_commission = scale * rate
+    if answer_commission > limit:
+        answer_commission = limit
+
+    # 4) 바가지 당첨
+    is_expensive = False
     if answer_commission < commission:
-        is_expensive = True # 바가지 당첨!
-
+        is_expensive = True
 
     return jsonify({"in": answer_in,"out":answer_out, "answer_commission":answer_commission,"is_expensive":is_expensive})
 
