@@ -169,8 +169,15 @@ def nlp():
     # ✅ 복비 계산
     monthly = extraInfo['monthly'] #월세or전세
     commission = extraInfo['commission'] #복비
-    deposit = extraInfo['deposit'] #보증금 (전세금)
+    deposit = extraInfo['deposit'] #월세 - 보증금
     monthlyMoney = extraInfo['monthlyMoney'] #월세
+    lumpSumMoney = extraInfo['lumpSumMoney'] # 전세금
+
+    scale = 0
+    rate = 0
+    limit = 0
+    answer_commission = 0
+    is_expensive = False
 
     # 1) 거래금액 Scale 계산하기 
     if monthly: #월세
@@ -179,9 +186,8 @@ def nlp():
         else:
             scale = deposit + monthlyMoney*100
     else: #전세
-        if deposit < 50000000:
-            scale= deposit
-
+        scale= lumpSumMoney
+    
     # 2) 거래금액에 따른 상한요율 rate, 한도액 limit 계산
     if  scale < 50000000: #5천만원 미만 / 0.5 (rate) / 20만(limit)
         rate = 0.005
@@ -208,7 +214,6 @@ def nlp():
         answer_commission = limit
 
     # 4) 바가지 당첨
-    is_expensive = False
     if answer_commission < commission:
         is_expensive = True
 
