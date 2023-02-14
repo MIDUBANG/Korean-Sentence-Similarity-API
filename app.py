@@ -241,16 +241,16 @@ def nlp():
 
         min_dis = 1000
 
-    # ✅ out
+    # ✅ out 포함 안된 것
     answer_out = []
 
-    # 1) 공통 필수인데 안들어간 것
+    # 1) 필수인데 안들어간 것 (유효 - 필수만 넣으면 됨)
     essential = [34, 35, 36, 37, 38]
     for es in essential:
         if not es in answer_in:
             answer_out.append(es)
 
-    # 2) 선택적
+    # 2) condition 
     pet = extraInfo["pet"]
     loan = extraInfo["loan"]
     substitute = extraInfo["substitute"]
