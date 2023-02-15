@@ -1,16 +1,14 @@
-import os
+#import os
+#from sklearn.feature_extraction.text import CountVectorizer
+#import konlpy
+
 from flask import Flask, render_template
 from flask import request, jsonify
-
 from konlpy.tag import Okt
 from flask_cors import CORS
-
-from sklearn.feature_extraction.text import CountVectorizer
-import konlpy
 from konlpy.tag import Okt
 import scipy as sp
 from sklearn.feature_extraction.text import TfidfVectorizer
-
 import numpy as np
 import pickle
 
@@ -35,6 +33,7 @@ t = Okt()
 vectorizer = TfidfVectorizer(min_df=1, decode_error="ignore")
 
 
+# case 순서대로 쭉 나열
 initialData = [
     ["입주 후 생긴 하자는 세입자가 수리한다.", "하자는 임차인이 수리한다.", "하자는 임차인이 책임지고 수리"],
     ["월세를 밀리면 퇴거", "이유 없이 월세를 두 달 이상 밀리면 퇴실", "월세를 내지 못한 경우 퇴실한다."],
