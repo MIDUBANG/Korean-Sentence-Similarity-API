@@ -8,19 +8,10 @@ RUN apt-get update && \
 
 
 # install java
-RUN  apt-get install openjdk-8-jre openjdk-8-jdk
-ENV JAVA_HOME="/usr/lib/jvm/java-1.8-openjdk"
+RUN  apt-get install g++ openjdk-8-jdk
+RUN apt-get install python3-dev
+RUN pip3 install konlpy
 
-# install python
-RUN apt-get install -y python3-pip python3-dev
-RUN cd /usr/local/bin && \
-  ln -s /usr/bin/python3 python && \
-  ln -s /usr/bin/pip3 pip && \
-  pip install --upgrade pip
-
-# apt clean
-RUN apt-get clean && \
-  rm -rf /var/lib/apt/lists/*
 
 # copy resources
 COPY . .
