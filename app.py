@@ -292,8 +292,13 @@ def nlp():
 
             if "Yes" in gpt_answer:
                 print('yes')
-                answer_origin.append(st1)
-                answer_in.append(g[0])
+                if answer_origin:
+                    if not answer_origin[-1] == st1:
+                        answer_origin.append(st1)
+                        answer_in.append(g[0])
+                else:
+                    answer_origin.append(st1)
+                    answer_in.append(g[0])
 
     print("최종 결과", answer_in)
 
