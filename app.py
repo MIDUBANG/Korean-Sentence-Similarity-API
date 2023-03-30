@@ -1,5 +1,5 @@
 import openai
-
+import os
 from flask import Flask, render_template
 from flask import request, jsonify
 from konlpy.tag import Okt
@@ -12,12 +12,12 @@ import pickle
 
 
 app = Flask(__name__)
+test = os.getenv('FLASK_API_KEY')
 
 CORS(app)
 
-
-YOUR_API_KEY = "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"
-
+YOUR_API_KEY = test
+print("제발",YOUR_API_KEY)
 
 def chatGPT(prompt, API_KEY=YOUR_API_KEY):
     # set api key
