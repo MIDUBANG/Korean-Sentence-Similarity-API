@@ -16,7 +16,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-YOUR_API_KEY = "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"
+YOUR_API_KEY = "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"
 
 
 def chatGPT(prompt, API_KEY=YOUR_API_KEY):
@@ -263,11 +263,9 @@ def nlp():
     contents = input["contents"]
     extraInfo = input["extraInfo"]
 
-    #print(contents)
-    #print(extraInfo)
-
     # ✅ in
     answer_in = []
+    answer_origin = []
 
     min_distance = 0
 
@@ -279,26 +277,28 @@ def nlp():
             distance_list.append(min_distance)
             
 
-            # if min_dis > sum_of_distance:
-            #     min_dis = sum_of_distance
-            #     best_case_i = j
-
         # GPT에게 distance_list[:2] 2개에 대해 진짜 가까운 문장이 있는지 물어보기
         #print("가깝다고 나온 문장들 모음", distance_list)
         distance_list = sorted(distance_list, key=lambda x: x[2])
         ask = distance_list[:2]
-        print(ask)
+        
+        print("질문:",ask)
+
         for g in ask:
             st1 = contents[i]
             st2 = initialData[g[0]][g[1]]
-            #print("gpt:", st1, st2)
             prompt = f"The following two sentences are special provisions of monthly rent contracts in Korea. Are the two special terms written for similar cases? answer yes or no. 1. {st1} 2. {st2}"
             gpt_answer = chatGPT(prompt)
-            #print(gpt_answer)
 
             if "Yes" in gpt_answer:
-                #print("예ㅡ쓰!!!!!!!!")
-                answer_in.append(g)
+                print('yes')
+                if answer_origin:
+                    if not answer_origin[-1] == st1:
+                        answer_origin.append(st1)
+                        answer_in.append(g[0])
+                else:
+                    answer_origin.append(st1)
+                    answer_in.append(g[0])
 
     print("최종 결과", answer_in)
 
@@ -377,12 +377,34 @@ def nlp():
     if answer_commission < commission:
         is_expensive = True
 
+
     return jsonify(
         {
             "in": answer_in,
             "out": answer_out,
             "answer_commission": answer_commission,
             "is_expensive": is_expensive,
+            "answer_origin":answer_origin,
+            "original":contents,
+          
+        }
+    )
+
+@app.route("/api/summary", methods=["POST"])
+def summary():
+    print(request)
+    input = request.get_json()
+    contents = input["contents"]
+    
+    gpt_answer = []
+
+    for i in range(len(contents)):
+        prompt = f"다음 내용을 요약해라. 최대한 짧게, 핵심만 담아서, 아주 친절하고 이해하기 쉽게 다시 작성하라. content: {contents[i]}"
+        gpt_answer.append(chatGPT(prompt)) 
+
+    return jsonify(
+        {
+         "summarys":gpt_answer
         }
     )
 
