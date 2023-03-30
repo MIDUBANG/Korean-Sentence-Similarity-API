@@ -16,7 +16,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-YOUR_API_KEY = "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"
+YOUR_API_KEY = "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"
 
 
 def chatGPT(prompt, API_KEY=YOUR_API_KEY):
@@ -265,6 +265,7 @@ def nlp():
 
     # ✅ in
     answer_in = []
+    answer_origin = []
 
     min_distance = 0
 
@@ -280,7 +281,9 @@ def nlp():
         #print("가깝다고 나온 문장들 모음", distance_list)
         distance_list = sorted(distance_list, key=lambda x: x[2])
         ask = distance_list[:2]
+        
         print("질문:",ask)
+
         for g in ask:
             st1 = contents[i]
             st2 = initialData[g[0]][g[1]]
@@ -289,6 +292,7 @@ def nlp():
 
             if "Yes" in gpt_answer:
                 print('yes')
+                answer_origin.append(st1)
                 answer_in.append(g[0])
 
     print("최종 결과", answer_in)
@@ -368,12 +372,16 @@ def nlp():
     if answer_commission < commission:
         is_expensive = True
 
+
     return jsonify(
         {
             "in": answer_in,
             "out": answer_out,
             "answer_commission": answer_commission,
             "is_expensive": is_expensive,
+            "answer_origin":answer_origin,
+            "original":contents,
+          
         }
     )
 
