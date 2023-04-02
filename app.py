@@ -399,7 +399,9 @@ def summary():
     gpt_answer = []
 
     for i in range(len(contents)):
-        prompt = f"다음 내용을 요약해라. 최대한 짧게, 핵심만 담아서, 아주 친절하고 이해하기 쉽게 다시 작성하라. content: {contents[i]}"
+        # prompt = f"You are a report analysis robot. Summarize [content]. 1. Summarize as concisely as possible. 2. Summarize with only the key points. 3. Write in a very friendly and understandable tone. 4. Write in respectful language. 5.Translate into Korean (does not print English results) 6.Get rid of all the extraneous words, and stick to the main points. => content: {contents[i]}"
+
+        prompt = f"너는 레포트 요약 로봇이다. content를 요약한 결과를 출력하라. (제한 사항 : 1. 반드시 존댓말로 작성하라. 2. 친절한 말투로 작성하라. 3.핵심 내용만 담아라. 4. 최대한 짧게 요약하라.) content: {contents[i]}"
         gpt_answer.append(chatGPT(prompt)) 
 
     return jsonify(
