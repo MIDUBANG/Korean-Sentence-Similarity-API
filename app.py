@@ -410,6 +410,49 @@ def summary():
         }
     )
 
+# Are the two special terms written for similar cases? answer yes or no. 1. {st1} 2. {st2}
+#         {"role": "system", "content": "Even if two sentences are included in each other, they are judged to have similar meanings."},
+# Are the two special terms written for similar cases? 
+def testGPT(st1, st2, API_KEY=YOUR_API_KEY):
+    # set api key
+    openai.api_key = API_KEY
+    # Call the chat GPT API
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+        {"role": "system", "content": "You are a machine that determines whether two sentences are similar."},
+        {"role": "system", "content": "The following two sentences are special provisions of monthly rent contracts in Korea."},
+        {"role": "system", "content": "Determine if both special contracts are written for similar cases."},
+        {"role": "system", "content": "The answer format should be yes or no only."},
+       
+        {"role": "user", "content": "answer yes or no => 1.월세와 보증금은 매년 시세에 맞게 조정할 수 있다. 2.금리 인상에 맞추어 월세를 인상한다."},
+        {"role": "assistant", "content": "yes"},
+        {"role": "user", "content": "answer yes or no =>  1.계약 기간을 1년으로 정했다면 1년 뒤 퇴거한다. 2.세입자는 1년 뒤 무조건 집을 뺀다."},
+        {"role": "assistant", "content": "yes"},
+        {"role": "user", "content": " answer yes or no =>  1.차임 2개월 이상 연체하면 단전·단수가 가능하다. 2.차임을 연속 두번 미납하면 계약을 해지한다."},
+        {"role": "assistant", "content": "no"},
+
+        {"role": "user", "content": f"answer yes or no =>  s1. {st1} 2. {st2}"}
+        ],
+        temperature=0,
+        max_tokens=10,
+        
+    )
+    return completion["choices"][0]["message"]["content"].encode("utf-8").decode()
+
+
+
+#temperature=0,
+print("1실행")
+st1 = "임차인은 월세 감액을 요구하지 않는다."
+st2 = "재계약 시 월세 감액은 없는 것으로 간주한다."
+#result = testGPT(st1, st2) # system 메세지와 
+#print(result)
+
+print('2실행')
+prompt = f'The following sentence "input" is one of the special provisions of the monthly rent contract in Korea. And the initialdata array is a case-by-case grouping of monthly rent contract terms that have a similar context. When adding an input sentence to an initial data array, answer the index location that needs to be inserted in the initial data[n] format. input = "세입자는 계약이 끝날 때 까지 전입 신고를 하지 않을 것을 약조한다. " initialData = [["월세와 보증금은 매년 시세에 맞게 조정할 수 있다.","시세에 맞게 월세를 인상한다.","시세에 맞게 보증금을 인상한다.","금리 인상에 맞추어 월세를 인상한다.","계약을 연장할 경우 월세를 인상한다."],....["1. 전입 신고를 하지 않는다.","2. 임차인은 전입 신고를 하지 않는다.","3. 계약 이후 전입 신고를 하지 않는다.","4. 임차인은 입주 후 전입 신고를 하지 않는다.","5. 임차인은 입주 후 전입 신고를 하지 않을 것을 약속한다.","6. 전입 신고를 하지 않기로 약속한다.","7. 전입 신고를 할 경우 계약을 파기 한다."],]'
+print(chatGPT(prompt))
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
