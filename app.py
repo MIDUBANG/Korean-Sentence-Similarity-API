@@ -10,14 +10,16 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import pickle
 
+from data import testData 
 
 app = Flask(__name__)
-test = os.getenv('FLASK_API_KEY')
+test = os.getenv("FLASK_API_KEY")
 
 CORS(app)
 
 YOUR_API_KEY = test
-print("제발",YOUR_API_KEY)
+print("제발", YOUR_API_KEY)
+
 
 def chatGPT(prompt, API_KEY=YOUR_API_KEY):
     # set api key
@@ -55,7 +57,7 @@ initialData = [
         "시세에 맞게 월세를 인상한다.",
         "시세에 맞게 보증금을 인상한다.",
         "금리 인상에 맞추어 월세를 인상한다.",
-        "계약을 연장할 경우 월세를 인상한다."
+        "계약을 연장할 경우 월세를 인상한다.",
     ],
     [
         "계약 기간을 1년으로 정했다면 1년 뒤 퇴거한다.",
@@ -63,21 +65,21 @@ initialData = [
         "임차인은 1년 뒤 퇴거한다. ",
         "임차인은 2년 뒤 퇴거한다.",
         "세입자는 1년 뒤 퇴거한다.",
-        "세입자는 1년 뒤 무조건 집을 뺀다."
+        "세입자는 1년 뒤 무조건 집을 뺀다.",
     ],
     [
         "1. 계약 만기 5개월 전 까지 재계약 의사를 밝히지 않은 경우, 계약은 만료되는 것으로 간주한다.",
         "2. 계약 연장은 계약 만기 3달 전까지 갱신 의사를 밝혀야만 가능하다.",
         "3. 묵시적 갱신은 배제한다. ",
         "4. 묵시적 갱시는 없는 것으로 한다.",
-        "5. 계약 연장 없이 무조건 n년 n월 n일에 집을 뺀다."
+        "5. 계약 연장 없이 무조건 n년 n월 n일에 집을 뺀다.",
     ],
     [
         "1. 임차인이 임차료를 연체하면 임대인이 임차인의 모든 짐을 처분한다.",
         "2. 월세를 두 번 이상 밀리면 임대인이 임차인의 짐을 강제로 뺄 수 있다.",
         "3. 집주인이 세입자의 짐을 뺼 수 있다.",
         "4. 월세를 세번 이상 밀리면 세입자 짐은 강제로 처분 될 수 있다. ",
-        "5. 월세를 3회분 이상 밀리면 임대인이 임차인의 동의 없이 짐을 처분 할 수 있다."
+        "5. 월세를 3회분 이상 밀리면 임대인이 임차인의 동의 없이 짐을 처분 할 수 있다.",
     ],
     [
         "1. 임대인이 매매로 변경되면 임대차계약도 같이 해지된다.",
@@ -85,28 +87,28 @@ initialData = [
         "3. 임대인이 바뀌는 경우, 이 계약은 해지된다. ",
         "4. 임대인이 바뀌더라도 계약은 승계되지 않는다. ",
         "5. 집 주인이 바뀌면 임대차 계약은 해지된다. ",
-        "6. 새로운 집 주인이 임대차 계약 해지를 원하는 경우 이 계약은 만료된다."
+        "6. 새로운 집 주인이 임대차 계약 해지를 원하는 경우 이 계약은 만료된다.",
     ],
     [
         "1. 월세를 세번 이상 밀린 경우, 집 주인이 전기와 수도를 끊을 수 있으며, 임차인은 이에 동의한다.",
         "2. 월세를 밀린 경우 단전 조치 할 수 있다.",
         "3. 월세를 밀린 경우 단수 조치 할 수 있다.",
         "4. 연체 시 단전·단수할 수 있다",
-        "5. 차임 2개월 이상 연체하면 단전·단수가 가능하다."
+        "5. 차임 2개월 이상 연체하면 단전·단수가 가능하다.",
     ],
     [
         "1. 임차인은 보증금 감액을 요구 할 수 없다.",
         "2. 재계약을 하더라도 보증금은 감액 할 수 없다.",
         "3. 세입자는 보증금 감액을 청구하지 않는다.",
         "4. 보증금을 줄일 수 없으므로 보증금 감액을 요구하지 않는다.",
-        "5. 보증금 증감청구는 인정되지 않는다. "
+        "5. 보증금 증감청구는 인정되지 않는다. ",
     ],
     [
         "1. 이 계약의 묵시적 갱신은 성립하지 않는다.",
         "2. 임차인은 계약이 만료되면 무조건 이사한다.",
         "3. 이 계약은 2년 뒤 해지되며, 연장되지 않는다.",
         "4. 임차인은 재계약을 요구하지 않는다.",
-        "5. 계약이 끝나면 무조건 이사 해야한다."
+        "5. 계약이 끝나면 무조건 이사 해야한다.",
     ],
     [
         "1. 세입자가 구해지면 보증금을 반환한다.",
@@ -114,14 +116,14 @@ initialData = [
         "3. 다음 임차인이 구해지면 보증금을 반환하도록 하겠다.",
         "4. 다음 임차인이 구해질 때 까지 보증금을 반환하지 않는다.",
         "5. 보증금은 다음 세입자가 구해진 뒤에 반환한다.",
-        "6. 보증금은 다음 임차인이 구해진 뒤 반환 가능하다."
+        "6. 보증금은 다음 임차인이 구해진 뒤 반환 가능하다.",
     ],
     [
         "1. 신규 임차인이 확보되기 전까지 임대료와 관리비 전액을 임차인이 부담한다",
         "2. 새 임차인을 구하기 전까지는 기존 임차인이 임대료를 부담한다.",
         "3. 새 임차인을 구하기 전까지는 기존 임차인이 관리비를 부담한다.",
         "4. 임대료를 3회 이상 납입하지 않는경우, 새 임차인을 구하기 전까지는 기존 임차인이 관리비를 부담한다.",
-        "5. 세입자 과실로 계약이 해지되는 경우, 다음 세입자를 구하기 전까지 발생하는 임대료와 관리비를 기존 세입자가 부담한다."
+        "5. 세입자 과실로 계약이 해지되는 경우, 다음 세입자를 구하기 전까지 발생하는 임대료와 관리비를 기존 세입자가 부담한다.",
     ],
     [
         "1. 월세를 한번이라도 연체한 경우 계약을 해지한다.",
@@ -130,7 +132,7 @@ initialData = [
         "4. 차임을 연속 두번 연체한 경우 계약은 해지된다.",
         "5. 월세를 연속 두 번 연체하면 계약은 해지된다.",
         "6. 월세를 연속 두 번 미납하면 계약을 해지한다.",
-        "7. 차임을 연속 두번 미납하면 계약을 해지한다."
+        "7. 차임을 연속 두번 미납하면 계약을 해지한다.",
     ],
     [
         "1. 임차인은 차임 감액을 요구하지 않는다.",
@@ -138,35 +140,35 @@ initialData = [
         "3. 재계약 시 월세 감액은 없는 것으로 간주한다.",
         "4. 계약 연장 시 차임 감액은 없는 것으로 간주한다.",
         "5. 월세 감액 요구를 하지 않는다.",
-        "6. 차임 감액 청구 금지"
+        "6. 차임 감액 청구 금지",
     ],
     [
         "1. 계약갱신 요구권을 행사하지 않는다.",
         "2. 이 계약에서 계약 갱신 요구권을 인정하지 않는다.",
         "3. 계약 갱신을 요구하지 않는다.",
         "4. 계약 연장은 불가능하다.",
-        "5. 이 계약은 어떤 상황에서도 연장되지 않는다."
+        "5. 이 계약은 어떤 상황에서도 연장되지 않는다.",
     ],
     [
         "1. 묵시적 갱신으로 계약이 연장 된 경우, 세입자는 무조건 2년간 살아야한다.",
         "2. 계약의 묵시적 갱신 시점부터 세임자는 2년간 입주 상태를 유지해야한다.",
         "3. 묵시적 갱신으로 계약이 연장된 경우, 계약은 2년간 유지된다.",
         "4. 묵시적 갱신으로 계약이 연장된 경우, 2년간 계약을 해지할 수 없다.",
-        "5. 계약 묵시적 갱신부터 계약은 2년간 유지되며, 2년이 지나기 전에는 계약을 해지 할 수 없다."
+        "5. 계약 묵시적 갱신부터 계약은 2년간 유지되며, 2년이 지나기 전에는 계약을 해지 할 수 없다.",
     ],
     [
         "1. 소음에 대한 항의를 하지 않는다.",
         "2. 벽간 소음은 다른 세입자로 인한 것이므로 임대인에게 책임이 없다.",
         "3. 건물 수리 중 발생하는 소음에 대해 항의하지 않는다.",
         "4. 집 상태를 위한 행위로 발생하는 소음에 대해 임차인은 항의하지 않는다.",
-        "5. 건물 상태를 위한 행위로 발생하는 소음에 대해 임차인은 항의하지 않는다."
+        "5. 건물 상태를 위한 행위로 발생하는 소음에 대해 임차인은 항의하지 않는다.",
     ],
     [
         "1. 월세를 연체한 이력이 있다면 계약 갱신을 거절 할 수 있다.",
         "2. 한번이라도 월세를 미납하는 경우 임대인은 계약 갱신을 거절 할 수 있다.",
         "3. 차임을 연체하면 임대인은 계약 갱신을 거절 할 수 있다.",
         "4. 차임을 한번이라도 미납하는 경우 임대인은 임차인의 계약 갱신 요구를 거절 할 수 있다.",
-        "5. 임차인이 월세를 밀린 경우 임대인은 계약 갱신을 거절 할 수 있다."
+        "5. 임차인이 월세를 밀린 경우 임대인은 계약 갱신을 거절 할 수 있다.",
     ],
     [
         "1. 전입 신고를 하지 않는다.",
@@ -175,7 +177,7 @@ initialData = [
         "4. 임차인은 입주 후 전입 신고를 하지 않는다.",
         "5. 임차인은 입주 후 전입 신고를 하지 않을 것을 약속한다.",
         "6. 전입 신고를 하지 않기로 약속한다.",
-        "7. 전입 신고를 할 경우 계약을 파기 한다."
+        "7. 전입 신고를 할 경우 계약을 파기 한다.",
     ],
 ]
 
@@ -249,7 +251,7 @@ def get_best(case_num, input):
 
         d = (case_num, i, dist_raw(post_vec, new_post_vec))
         temp_distance.append(d)
-    
+
     temp_distance = sorted(temp_distance, key=lambda x: x[2])  # 거리 가까운 순으로 정렬
 
     min_value = temp_distance[0]
@@ -270,19 +272,18 @@ def nlp():
     min_distance = 0
 
     for i in range(len(contents)):  # input으로 들어온 문장 개수만큼 돌리기
-        distance_list = [] # 거리 저장 할 리스트
+        distance_list = []  # 거리 저장 할 리스트
 
         for j in range(len(initialData)):  # 보유 중인 case 개수만큼 돌리기
             min_distance = get_best(j, [contents[i]])  # 케이스별 (케이스 번호, 인덱스, 거리)
             distance_list.append(min_distance)
-            
 
         # GPT에게 distance_list[:2] 2개에 대해 진짜 가까운 문장이 있는지 물어보기
-        #print("가깝다고 나온 문장들 모음", distance_list)
+        # print("가깝다고 나온 문장들 모음", distance_list)
         distance_list = sorted(distance_list, key=lambda x: x[2])
         ask = distance_list[:2]
-        
-        print("질문:",ask)
+
+        print("질문:", ask)
 
         for g in ask:
             st1 = contents[i]
@@ -291,7 +292,7 @@ def nlp():
             gpt_answer = chatGPT(prompt)
 
             if "Yes" in gpt_answer:
-                print('yes')
+                print("yes")
                 if answer_origin:
                     if not answer_origin[-1] == st1:
                         answer_origin.append(st1)
@@ -377,42 +378,38 @@ def nlp():
     if answer_commission < commission:
         is_expensive = True
 
-
     return jsonify(
         {
             "in": answer_in,
             "out": answer_out,
             "answer_commission": answer_commission,
             "is_expensive": is_expensive,
-            "answer_origin":answer_origin,
-            "original":contents,
-          
+            "answer_origin": answer_origin,
+            "original": contents,
         }
     )
+
 
 @app.route("/api/summary", methods=["POST"])
 def summary():
     print(request)
     input = request.get_json()
     contents = input["contents"]
-    
+
     gpt_answer = []
 
     for i in range(len(contents)):
         # prompt = f"You are a report analysis robot. Summarize [content]. 1. Summarize as concisely as possible. 2. Summarize with only the key points. 3. Write in a very friendly and understandable tone. 4. Write in respectful language. 5.Translate into Korean (does not print English results) 6.Get rid of all the extraneous words, and stick to the main points. => content: {contents[i]}"
 
         prompt = f"너는 레포트 요약 로봇이다. content를 요약한 결과를 출력하라. (제한 사항 : 1. 반드시 존댓말로 작성하라. 2. 친절한 말투로 작성하라. 3.핵심 내용만 담아라. 4. 최대한 짧게 요약하라.) content: {contents[i]}"
-        gpt_answer.append(chatGPT(prompt)) 
+        gpt_answer.append(chatGPT(prompt))
 
-    return jsonify(
-        {
-         "summarys":gpt_answer
-        }
-    )
+    return jsonify({"summarys": gpt_answer})
+
 
 # Are the two special terms written for similar cases? answer yes or no. 1. {st1} 2. {st2}
 #         {"role": "system", "content": "Even if two sentences are included in each other, they are judged to have similar meanings."},
-# Are the two special terms written for similar cases? 
+# Are the two special terms written for similar cases?
 def testGPT(st1, st2, API_KEY=YOUR_API_KEY):
     # set api key
     openai.api_key = API_KEY
@@ -423,36 +420,106 @@ def testGPT(st1, st2, API_KEY=YOUR_API_KEY):
         {"role": "system", "content": "You are a machine that determines whether two sentences are similar."},
         {"role": "system", "content": "The following two sentences are special provisions of monthly rent contracts in Korea."},
         {"role": "system", "content": "Determine if both special contracts are written for similar cases."},
+        {"role": "system", "content": "If the purpose of the two clauses is the same, if one sentence includes the other sentence, or if the core meaning of the two sentences is the same, the evaluation is 'yes'."},
         {"role": "system", "content": "The answer format should be yes or no only."},
-       
-        {"role": "user", "content": "answer yes or no => 1.월세와 보증금은 매년 시세에 맞게 조정할 수 있다. 2.금리 인상에 맞추어 월세를 인상한다."},
-        {"role": "assistant", "content": "yes"},
-        {"role": "user", "content": "answer yes or no =>  1.계약 기간을 1년으로 정했다면 1년 뒤 퇴거한다. 2.세입자는 1년 뒤 무조건 집을 뺀다."},
-        {"role": "assistant", "content": "yes"},
-        {"role": "user", "content": " answer yes or no =>  1.차임 2개월 이상 연체하면 단전·단수가 가능하다. 2.차임을 연속 두번 미납하면 계약을 해지한다."},
-        {"role": "assistant", "content": "no"},
-
         {"role": "user", "content": f"answer yes or no =>  s1. {st1} 2. {st2}"}
         ],
         temperature=0,
         max_tokens=10,
-        
     )
     return completion["choices"][0]["message"]["content"].encode("utf-8").decode()
 
 
 
-#temperature=0,
-print("1실행")
+
+# temperature=0,
 st1 = "임차인은 월세 감액을 요구하지 않는다."
 st2 = "재계약 시 월세 감액은 없는 것으로 간주한다."
-#result = testGPT(st1, st2) # system 메세지와 
-#print(result)
+# result = testGPT(st1, st2) # system 메세지와
+# print(result)
 
-print('2실행')
-prompt = f'The following sentence "input" is one of the special provisions of the monthly rent contract in Korea. And the initialdata array is a case-by-case grouping of monthly rent contract terms that have a similar context. When adding an input sentence to an initial data array, answer the index location that needs to be inserted in the initial data[n] format. input = "세입자는 계약이 끝날 때 까지 전입 신고를 하지 않을 것을 약조한다. " initialData = [["월세와 보증금은 매년 시세에 맞게 조정할 수 있다.","시세에 맞게 월세를 인상한다.","시세에 맞게 보증금을 인상한다.","금리 인상에 맞추어 월세를 인상한다.","계약을 연장할 경우 월세를 인상한다."],....["1. 전입 신고를 하지 않는다.","2. 임차인은 전입 신고를 하지 않는다.","3. 계약 이후 전입 신고를 하지 않는다.","4. 임차인은 입주 후 전입 신고를 하지 않는다.","5. 임차인은 입주 후 전입 신고를 하지 않을 것을 약속한다.","6. 전입 신고를 하지 않기로 약속한다.","7. 전입 신고를 할 경우 계약을 파기 한다."],]'
-print(chatGPT(prompt))
+# print("2실행")
+# prompt = f'The following sentence "input" is one of the special provisions of the monthly rent contract in Korea. And the initialdata array is a case-by-case grouping of monthly rent contract terms that have a similar context. When adding an input sentence to an initial data array, answer the index location that needs to be inserted in the initial data[n] format. input = "세입자는 계약이 끝날 때 까지 전입 신고를 하지 않을 것을 약조한다. " initialData = [["월세와 보증금은 매년 시세에 맞게 조정할 수 있다.","시세에 맞게 월세를 인상한다.","시세에 맞게 보증금을 인상한다.","금리 인상에 맞추어 월세를 인상한다.","계약을 연장할 경우 월세를 인상한다."],....["1. 전입 신고를 하지 않는다.","2. 임차인은 전입 신고를 하지 않는다.","3. 계약 이후 전입 신고를 하지 않는다.","4. 임차인은 입주 후 전입 신고를 하지 않는다.","5. 임차인은 입주 후 전입 신고를 하지 않을 것을 약속한다.","6. 전입 신고를 하지 않기로 약속한다.","7. 전입 신고를 할 경우 계약을 파기 한다."],]'
+# print(chatGPT(prompt))
+
+
+# import time
+
+
+# print('====== 1 실행=====')
+# record1 = []
+# answer_count1 = 0
+# for i in range(len(testData)):
+#     print(i,"/",len(testData))
+#     time.sleep(1)
+#     result = testGPT(testData[i][0],testData[i][-1])
+    
+#     if 'yes' in result or 'Yes' in result:
+#         answer_count1 += 1
+#     else:
+#         record1.append(i) 
+
+# time.sleep(3)
+
+# print('<<<<<<<< 1번 API 실행 결과 <<<<<<<< ')
+# print("정답 개수 : ",answer_count1)
+# print("오답 개수 : ",len(testData) - answer_count1)
+# print("오답이 나온 케이스 >> \n", record1)
+
+
+# print('====== 2 실행=====')
+# record2 = []
+# answer_count2 = 0
+# for i in range(len(testData)):
+#     print(i,"/",len(testData))
+#     time.sleep(2)
+#     prompt = f"The following two sentences are special provisions of monthly rent contracts in Korea. Are the two special terms written for similar cases? answer yes or no. 1. {testData[i][0]} 2. {testData[i][-1]}"
+#     result = chatGPT(prompt)
+
+#     if 'Yes' in result:
+#         answer_count2 += 1
+    
+#     record2.append([i,result])
+
+# time.sleep(3)
+
+# print('<<<<<<<< 2번 API 실행 결과 <<<<<<<< ')
+# print("정답 개수 : ",answer_count2)
+# print("오답 개수 : ",len(testData) - answer_count2)
+# print("상세 결과 >> \n", record2)
+
+
+@app.route("/api/message", methods=["POST"])
+def TextMassageMaker(API_KEY=YOUR_API_KEY):
+    input = request.get_json()
+    receiver = input["receiver"]
+    purpose = input["purpose"]
+    tone = input["tone"]
+    more_info = input["more_info"]
+
+
+    # receiver = "옆 집 이웃"
+    # purpose = "옆 집이 너무 시끄러워서 밤에 잘 수가 없음. 밤에 제발 조용히 했으면 함"
+    # tone = "화났으나 정중하게"
+    # more_info = "한번도 얼굴 본 적 없음"
+
+    prompt = f"조건에 맞게 문자 메세지를 작성하라. 최대한 길게 작성하라. \n 1. 수신자 : ${receiver}\n2. 문자 쓰는 목적 : ${purpose}\n3. 문자의 어조 : ${tone}\n4. 추가적인 상황 정보 : ${more_info}\n\n 조건\n- 문자의 시작은 '안녕하세요'로 한다\n- 도입에 내가 누구인지 밝힌다.\n- 서론, 본론, 결론의 구성으로 작성하고 문단별로 줄바꿈을한다다.\n- 문자 내용만 출력한다."
+    # set api key
+    openai.api_key = API_KEY
+    # Call the chat GPT API
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.8,
+    )
+
+    message_result = completion["choices"][0]["message"]["content"].encode("utf-8").decode()
+
+    return jsonify({"result": message_result})
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
