@@ -13,28 +13,41 @@ import pickle
 from data import initialDataSet
 
 app = Flask(__name__)
-test = os.getenv("FLASK_API_KEY")
+
+API_KEY= os.getenv("FLASK_API_KEY")
 
 CORS(app)
 
-YOUR_API_KEY = test
-print("제발", YOUR_API_KEY)
 
-
-def chatGPT(prompt, API_KEY=YOUR_API_KEY):
+def crossCheckingGPT(st1, st2, API_KE=API_KEY):
     # set api key
     openai.api_key = API_KEY
     # Call the chat GPT API
-    completion = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=1024,
-        n=1,
-        stop=None,
-        temperature=0.0,
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+         {"role": "user", "content": f"Q: For the sentence pair '계약 연장은 계약 만기 3달 전까지 갱신 의사를 밝혀야만 가능하다.' and '계약 만기 5개월 전 까지 재계약 의사를 밝히지 않은 경우, 계약은 만료되는 것으로 간주한다.', do these two sentences have the same semantics?"},
+        {"role": "assistant", "content": " First, identify the key differences between the two sentences. Second, consider the impact of the difference in wording. Third, consider the overall meaning of the two sentences. Therefore, given that the two sentences convey the same general idea, despite the difference in wording, we can conclude that they have the same semantics. The answer (yes or no) is: yes."},
+        {"role": "user", "content": f"Q: For the sentence pair {st1} and {st2}, do these two sentences have the same semantics? The answer (yes or no) is: ____"}
+        ],
+        temperature=0,
     )
-    return completion.choices[0].text
-    #return completion["choices"][0]["message"]["content"].encode("utf-8").decode()
+    return completion["choices"][0]["message"]["content"].encode("utf-8").decode()
+
+
+def summaryGPT(prompt):
+    # set api key
+    openai.api_key = API_KEY
+    # Call the chat GPT API
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+         {"role": "user", "content": prompt},
+        ],
+        temperature=0.3,
+    )
+    return completion["choices"][0]["message"]["content"].encode("utf-8").decode()
+
 
 
 @app.route("/")
@@ -135,6 +148,8 @@ def get_best(case_num, input):
 
 @app.route("/api/nlp", methods=["POST"])
 def nlp():
+    chatapi_request_num = 0
+
     input = request.get_json()
     contents = input["contents"]
     extraInfo = input["extraInfo"]
@@ -153,23 +168,21 @@ def nlp():
             distance_list.append(min_distance)
 
         # GPT에게 distance_list[:2] 2개에 대해 진짜 가까운 문장이 있는지 물어보기
-        # print("가깝다고 나온 문장들 모음", distance_list)
         distance_list = sorted(distance_list, key=lambda x: x[2])
         ask = distance_list[:2]
 
         print("질문:", ask)
 
+
         for g in ask:
             st1 = contents[i]
             st2 = initialData[g[0]][g[1]]
-            prompt = f"The following two sentences are special provisions of monthly rent contracts in Korea. Are the two special terms written for similar cases? answer yes or no. 1. {st1} 2. {st2}"
-            print("질문:", st1,st2)
-            gpt_answer = chatGPT(prompt)
+            gpt_answer = crossCheckingGPT(st1,st2)
 
-            print("답변 :", gpt_answer)
+            print("비교 대상 문장 : ", st2)
+            print('답변:',gpt_answer)
 
             if "Yes" in gpt_answer or "yes" in gpt_answer:
-                print("yes")
                 if answer_origin:
                     if not answer_origin[-1] == st1:
                         answer_origin.append(st1)
@@ -277,34 +290,65 @@ def summary():
 
     for i in range(len(contents)):
         # prompt = f"You are a report analysis robot. Summarize [content]. 1. Summarize as concisely as possible. 2. Summarize with only the key points. 3. Write in a very friendly and understandable tone. 4. Write in respectful language. 5.Translate into Korean (does not print English results) 6.Get rid of all the extraneous words, and stick to the main points. => content: {contents[i]}"
-
         prompt = f"너는 레포트 요약 로봇이다. content를 요약한 결과를 출력하라. (제한 사항 : 1. 반드시 존댓말로 작성하라. 2. 친절한 말투로 작성하라. 3.핵심 내용만 담아라. 4. 최대한 짧게 요약하라.) content: {contents[i]}"
-        gpt_answer.append(chatGPT(prompt))
+        gpt_answer.append(summaryGPT(prompt))
 
     return jsonify({"summarys": gpt_answer})
 
 
-# Are the two special terms written for similar cases? answer yes or no. 1. {st1} 2. {st2}
-#         {"role": "system", "content": "Even if two sentences are included in each other, they are judged to have similar meanings."},
-# Are the two special terms written for similar cases?
-def testGPT(st1, st2, API_KEY=YOUR_API_KEY):
+
+
+@app.route("/api/message", methods=["POST"])
+def TextMassageMaker(API_KEY=API_KEY):
+    input = request.get_json()
+    receiver = input["receiver"]
+    purpose = input["purpose"]
+    tone = input["tone"]
+    more_info = input["more_info"]
+
+    prompt = f"조건에 맞게 문자 메세지를 작성하라. 최대한 길게 작성하라. \n 1. 수신자 : ${receiver}\n2. 문자 쓰는 목적 : ${purpose}\n3. 문자의 어조 : ${tone}\n4. 추가적인 상황 정보 : ${more_info}\n\n 조건\n- 문자의 시작은 '안녕하세요'로 한다\n- 도입에 내가 누구인지 밝힌다.\n- 서론, 본론, 결론의 구성으로 작성하고 문단별로 줄바꿈을한다다.\n- 문자 내용만 출력한다."
     # set api key
     openai.api_key = API_KEY
     # Call the chat GPT API
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-        {"role": "system", "content": "You are a machine that determines whether two sentences are similar."},
-        {"role": "system", "content": "The following two sentences are special provisions of monthly rent contracts in Korea."},
-        {"role": "system", "content": "Determine if both special contracts are written for similar cases."},
-        {"role": "system", "content": "If the purpose of the two clauses is the same, if one sentence includes the other sentence, or if the core meaning of the two sentences is the same, the evaluation is 'yes'."},
-        {"role": "system", "content": "The answer format should be yes or no only."},
-        {"role": "user", "content": f"answer yes or no =>  s1. {st1} 2. {st2}"}
+            {"role": "user", "content": prompt},
         ],
-        temperature=0,
-        max_tokens=10,
+        temperature=0.8,
     )
-    return completion["choices"][0]["message"]["content"].encode("utf-8").decode()
+
+    message_result = completion["choices"][0]["message"]["content"].encode("utf-8").decode()
+
+    return jsonify({"result": message_result})
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
+
+
+
+# Are the two special terms written for similar cases? answer yes or no. 1. {st1} 2. {st2}
+#         {"role": "system", "content": "Even if two sentences are included in each other, they are judged to have similar meanings."},
+# Are the two special terms written for similar cases?
+# def testGPT(st1, st2, API_KEY=YOUR_API_KEY):
+#     # set api key
+#     openai.api_key = API_KEY
+#     # Call the chat GPT API
+#     completion = openai.ChatCompletion.create(
+#         model="gpt-3.5-turbo",
+#         messages=[
+#         {"role": "system", "content": "You are a machine that determines whether two sentences are similar."},
+#         {"role": "system", "content": "The following two sentences are special provisions of monthly rent contracts in Korea."},
+#         {"role": "system", "content": "Determine if both special contracts are written for similar cases."},
+#         {"role": "system", "content": "If the purpose of the two clauses is the same, if one sentence includes the other sentence, or if the core meaning of the two sentences is the same, the evaluation is 'yes'."},
+#         {"role": "system", "content": "The answer format should be yes or no only."},
+#         {"role": "user", "content": f"answer yes or no =>  s1. {st1} 2. {st2}"}
+#         ],
+#         temperature=0,
+#         max_tokens=10,
+#     )
+#     return completion["choices"][0]["message"]["content"].encode("utf-8").decode()
 
 
 
@@ -363,39 +407,3 @@ def testGPT(st1, st2, API_KEY=YOUR_API_KEY):
 # print("정답 개수 : ",answer_count2)
 # print("오답 개수 : ",len(testData) - answer_count2)
 # print("상세 결과 >> \n", record2)
-
-
-@app.route("/api/message", methods=["POST"])
-def TextMassageMaker(API_KEY=YOUR_API_KEY):
-    input = request.get_json()
-    receiver = input["receiver"]
-    purpose = input["purpose"]
-    tone = input["tone"]
-    more_info = input["more_info"]
-
-
-    # receiver = "옆 집 이웃"
-    # purpose = "옆 집이 너무 시끄러워서 밤에 잘 수가 없음. 밤에 제발 조용히 했으면 함"
-    # tone = "화났으나 정중하게"
-    # more_info = "한번도 얼굴 본 적 없음"
-
-    prompt = f"조건에 맞게 문자 메세지를 작성하라. 최대한 길게 작성하라. \n 1. 수신자 : ${receiver}\n2. 문자 쓰는 목적 : ${purpose}\n3. 문자의 어조 : ${tone}\n4. 추가적인 상황 정보 : ${more_info}\n\n 조건\n- 문자의 시작은 '안녕하세요'로 한다\n- 도입에 내가 누구인지 밝힌다.\n- 서론, 본론, 결론의 구성으로 작성하고 문단별로 줄바꿈을한다다.\n- 문자 내용만 출력한다."
-    # set api key
-    openai.api_key = API_KEY
-    # Call the chat GPT API
-    completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.8,
-    )
-
-    message_result = completion["choices"][0]["message"]["content"].encode("utf-8").decode()
-
-    return jsonify({"result": message_result})
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
