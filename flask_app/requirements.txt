@@ -1,6 +1,8 @@
 alembic==1.8.1
 aniso8601==9.0.1
 attrs==22.1.0
+boto3==1.23.10
+botocore==1.26.10
 certifi==2022.9.24
 cffi==1.15.1
 charset-normalizer==2.1.1
@@ -23,8 +25,8 @@ importlib-metadata==5.0.0
 importlib-resources==5.10.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
+jmespath==0.10.0
 joblib==1.2.0
-JPype1==1.1.2
 jsonschema==4.17.3
 jwcrypto==1.4.2
 konlpy==0.6.0
@@ -44,6 +46,7 @@ pycryptodome==3.15.0
 pyparsing==3.0.9
 Pyrebase4==4.5.0
 pyrsistent==0.19.2
+python-dateutil==2.8.2
 python-jwt==4.0.0
 pytz==2022.6
 requests==2.28.1
@@ -58,3 +61,8 @@ urllib3==1.26.12
 Werkzeug==2.2.2
 wrapt==1.14.1
 zipp==3.10.0
+jsonpickle
+python-dotenv
+gunicorn
+s3transfer
+openai
