@@ -52,7 +52,7 @@ jobs:
       with:
        host: ${{ secrets.HOST }}
        username: ubuntu
-       key: ${{ secrets.c }}
+       key: ${{ secrets.PRIVATE_KEY }}
        script: |
           sh /home/ubuntu/srv/nlp_clova/run_docker.sh
 
