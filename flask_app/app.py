@@ -349,7 +349,7 @@ def clovaocr_from_image():
     #이미지 저장
     im = Image.open(image)
     path, ext = os.path.splitext(image.filename)
-    imgpath = f'flask_app/uploads/ocr_image{ext}'
+    imgpath = f'uploads/ocr_image{ext}'
     im.save(imgpath) # 파일명을 보호하기위한 함수, 지정된 경로에 파일 저장
 
     # s3 업로드
