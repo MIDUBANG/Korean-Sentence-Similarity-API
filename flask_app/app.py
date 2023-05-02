@@ -381,7 +381,9 @@ def clovaocr_from_image():
     res = requests.post(clova_url, json=requestJson, headers=headers)
     result = res.json()
     infer_texts = [field["inferText"] for field in result["images"][0]["fields"]]
-    return jsonpickle.encode(get_cases(infer_texts))
+    data = {'text': infer_texts, 's3_url':s3_url}
+    return jsonify(data)
+    # return jsonpickle.encode(get_cases(infer_texts))
 
 def get_cases(inputlist):
     # 특약사항 부분만 추출
