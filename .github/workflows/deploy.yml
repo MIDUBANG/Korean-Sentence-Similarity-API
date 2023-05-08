@@ -46,6 +46,7 @@ jobs:
         remote_path: /home/ubuntu/srv/nlp_clova
         remote_host: ${{ secrets.HOST }}
         remote_user: ubuntu
+        remote_port : 22222
         remote_key: ${{ secrets.PRIVATE_KEY }}
     
     - name: Deploy
