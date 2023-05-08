@@ -393,7 +393,7 @@ def get_cases(inputlist):
     # 특약사항 부분만 추출
     start_index = inputlist.index('특약사항')
     last_index = len(inputlist) - 1 - inputlist[::-1].index('본')
-    output = inputlist[start_index:last_index]
+    output = inputlist[start_index+1:last_index]
 
     #추출된 원소들을 문장으로 조합
     sentences = []
