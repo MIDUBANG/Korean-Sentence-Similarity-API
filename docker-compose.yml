@@ -21,7 +21,7 @@ services:
   
   nginx:
     container_name: nginx
-    image: nginx:latest
+    build: ./nginx
     restart: always
     ports:
       - "80:80"
