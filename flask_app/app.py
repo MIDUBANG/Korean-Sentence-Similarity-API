@@ -67,10 +67,6 @@ def summaryGPT(prompt):
 
 
 
-@app.route("/")
-def home():
-    return render_template("index.html")
-
 
 def dist_raw(v1, v2):
     delta = v1 - v2
