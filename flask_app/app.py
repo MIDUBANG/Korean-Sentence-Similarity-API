@@ -269,15 +269,15 @@ def nlp():
     substitute = extraInfo["substitute"]
 
     if pet:  # 반려 동물
-        if not 25 in answer_in:
+        if not (25 in answer_in or 25 in answer_out):
             answer_out.append(25)
     if loan:  # 전세 대출
-        if not 36 in answer_in:
+        if not (36 in answer_in or 36 in answer_out):
             answer_out.append(36)
-        if not 46 in answer_in:
+        if not (46 in answer_in or 46 in answer_out):
             answer_out.append(46)
     if substitute:  # 대리인
-        if not 52 in answer_in:
+        if not (52 in answer_in or 52 in answer_out):
             answer_out.append(52)
 
     # ✅ 복비 계산
