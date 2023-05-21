@@ -284,10 +284,10 @@ def nlp():
 
     # ✅ 복비 계산
     monthly = extraInfo["monthly"]  # 월세or전세
-    commission = extraInfo["commission"] * 10000 # 복비
-    deposit = extraInfo["deposit"] * 10000 # 월세 - 보증금
-    monthlyMoney = extraInfo["monthlyMoney"] * 10000 # 월세
-    lumpSumMoney = extraInfo["lumpSumMoney"] * 10000 # 전세금
+    commission = extraInfo["commission"]  # 복비
+    deposit = extraInfo["deposit"]  # 월세 - 보증금
+    monthlyMoney = extraInfo["monthlyMoney"]  # 월세
+    lumpSumMoney = extraInfo["lumpSumMoney"]  # 전세금
 
     scale = 0
     rate = 0
