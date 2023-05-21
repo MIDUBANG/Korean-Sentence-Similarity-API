@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import openai
 import os
 from flask import Flask, render_template
@@ -44,27 +43,8 @@ def crossCheckingGPT(st1, st2, API_KE=API_KEY):
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-         {"role": "system", "content": "You are an LLM (Language Model) that, upon receiving two sentences as input, determines whether they have the same semantic meaning and responds with either 'Yes.' or 'No.'."},
          {"role": "user", "content": f"Q: For the sentence pair '계약 연장은 계약 만기 3달 전까지 갱신 의사를 밝혀야만 가능하다.' and '계약 만기 5개월 전 까지 재계약 의사를 밝히지 않은 경우, 계약은 만료되는 것으로 간주한다.', do these two sentences have the same semantics?"},
-         {"role": "assistant", "content": "A: First, identify the key differences between the two sentences. Second, consider the impact of the difference in wording. Third, consider the overall meaning of the two sentences. Therefore, given that the two sentences convey the same general idea, despite the difference in wording, we can conclude that they have the same semantics. The answer (yes or no) is: yes."},
-         {"role":"user", "content": f"Q: For the sentence pair '임대인이 사전에 고지하지 않은 체납 사실이 확인된 경우에는 계약을 해지하며, 임차인에게 계약금을 돌려준다.' and '계약 시 임대인이 임차인에게 국세,지방세 체납이나 근저당권 이자 체납이 있는지 알리고, 계약 체결 후에는 임대인이 세무서, 지방자치 등에 이를 확인할 수 있게 한다. 고지하지 않은 체납 사실이 확인되면 계약을 해지한다.', do these two sentences have the same semantics?"},
-         {"role": "assistant", "content": "A: First, identify the key differences between the two sentences. Second, consider the impact of the difference in wording. Third, consider the overall meaning of the two sentences. Therefore, Both sentences share the same semantic meaning, which is that the landlord must inform the tenant in advance about the nonpayment of taxes, and if not done so, terminate the contract. Therefore, we can conclude that the two sentences have the same semantic. The answer (yes or no) is: yes."},
-         {"role": "user", "content": f"Q: For the sentence pair '다음 임차인이 구해지면 보증금을 반환한다.' and '세입자가 구해질 때 까지 보증금을 반환하지 못한다.', do these two sentences have the same semantics?"},
-         {"role": "assistant", "content": "A: First, identify the key differences between the two sentences. Second, consider the impact of the difference in wording. Third, consider the overall meaning of the two sentences. Therefore, Both sentences share the same semantic meaning, which is that the security deposit will not be refunded until the next tenant is found, but it will be returned once the next tenant is secured. Therefore, we can conclude that the two sentences have the same semantics. The answer (yes or no) is: yes."},
-         {"role": "user", "content": f"Q: For the sentence pair {st1} and {st2}, do these two sentences have the same semantics? The answer (yes or no) is: ____"}
-        ],
-        temperature=0,
-    )
-    return completion["choices"][0]["message"]["content"].encode("utf-8").decode()
-
-def crossCheckingWithoutCoT(st1, st2, API_KE=API_KEY):
-    # set api key
-    openai.api_key = API_KEY
-    # Call the chat GPT API
-    completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-         {"role": "user", "content": f"Q: For the sentence pair '계약 연장은 계약 만기 3달 전까지 갱신 의사를 밝혀야만 가능하다.' and '계약 만기 5개월 전 까지 재계약 의사를 밝히지 않은 경우, 계약은 만료되는 것으로 간주한다.', do these two sentences have the same semantics?"},
+        {"role": "assistant", "content": " First, identify the key differences between the two sentences. Second, consider the impact of the difference in wording. Third, consider the overall meaning of the two sentences. Therefore, given that the two sentences convey the same general idea, despite the difference in wording, we can conclude that they have the same semantics. The answer (yes or no) is: yes."},
         {"role": "user", "content": f"Q: For the sentence pair {st1} and {st2}, do these two sentences have the same semantics? The answer (yes or no) is: ____"}
         ],
         temperature=0,
@@ -86,6 +66,10 @@ def summaryGPT(prompt):
     return completion["choices"][0]["message"]["content"].encode("utf-8").decode()
 
 
+
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 
 def dist_raw(v1, v2):
@@ -178,34 +162,6 @@ def get_best(case_num, input):
 
     return min_value
 
-# @app.route("/api/gpttest", methods=["POST"])
-# def gpt_test():
-#     input = request.get_json()
-#     st1 = input['st1']
-#     st2 = input['st2']
-#     gpt_answer = crossCheckingGPT(st1,st2,API_KEY)
-#     gpt_answer2 = crossCheckingWithoutCoT(st1, st2, API_KEY)
-    
-#     print("------------------------------------------")
-#     print("CoT를 적용하지 않은 프롬프팅")
-#     print("------------------------------------------")
-
-#     print('문장1:', st1)
-#     print('문장2:', st2)
-#     print('답변:',gpt_answer2)
-
-#     print("------------------------------------------")
-#     print("CoT를 적용한 프롬프팅")
-#     print("------------------------------------------")
-#     print('문장1:', st1)
-#     print('문장2:', st2)
-#     print('답변:',gpt_answer)
-
-#     return jsonify({
-#         'gpt_answer' : gpt_answer
-#     })
-
-
 
 @app.route("/api/nlp", methods=["POST"])
 def nlp():
@@ -217,6 +173,7 @@ def nlp():
 
     # ✅ in
     answer_in = []
+
     answer_origin = []
 
     min_distance = 0
@@ -227,46 +184,32 @@ def nlp():
         for j in range(len(initialData)):  # 보유 중인 case 개수만큼 돌리기
             min_distance = get_best(j, [contents[i]])  # 케이스별 (케이스 번호, 인덱스, 거리)
             distance_list.append(min_distance)
-    
+
+        # GPT에게 distance_list[:2] 2개에 대해 진짜 가까운 문장이 있는지 물어보기
         distance_list = sorted(distance_list, key=lambda x: x[2])
-        ask = distance_list[0]
+        ask = distance_list[:2]
+
+        print("질문:", ask)
+
 
         for g in ask:
             st1 = contents[i]
             st2 = initialData[g[0]][g[1]]
-            
-            if answer_origin: # 하나라도 들어있음 
-                if not answer_origin[-1] == st1:
+            #gpt_answer = crossCheckingGPT(st1,st2)
+
+            print("비교 대상 문장 : ", st2)
+            print('답변:',gpt_answer)
+
+            if answer_origin:
+                    if not answer_origin[-1] == st1:
+                        answer_origin.append(st1)
+                        in_set =  {"caseNo" : g[0],"rawCase" :contents[i]}
+                        answer_in.append(in_set)
+                else:
                     answer_origin.append(st1)
-                    answer_in.append(g[0])
-                    
-                else: # 빈배열이면 걍 넣고
-                    answer_origin.append(st1)
-                    answer_in.append(g[0])
-
-        # GPT에게 distance_list[:2] 2개에 대해 진짜 가까운 문장이 있는지 물어보기
-        # distance_list = sorted(distance_list, key=lambda x: x[2])
-        # ask = distance_list[:2]
-
-        # print("질문:", ask)
-
-
-        # for g in ask:
-        #     st1 = contents[i]
-        #     st2 = initialData[g[0]][g[1]]
-        #     gpt_answer = crossCheckingGPT(st1,st2)
-
-        #     print("비교 대상 문장 : ", st2)
-        #     print('답변:',gpt_answer)
-
-        #     if "Yes" in gpt_answer or "yes" in gpt_answer:
-        #         if answer_origin: # 하나라도 들어있음 
-        #             if not answer_origin[-1] == st1:
-        #                 answer_origin.append(st1)
-        #                 answer_in.append(g[0])
-        #         else: # 빈배열이면 걍 넣고
-        #             answer_origin.append(st1)
-        #             answer_in.append(g[0])
+                    in_set =  {"caseNo" : g[0],"rawCase" :contents[i]}
+                    answer_in.append(in_set)
+                
 
     print("최종 결과", answer_in)
 
@@ -274,7 +217,7 @@ def nlp():
     answer_out = []
 
     # 1) 필수인데 안들어간 것 (유효 - 필수만 넣으면 됨)
-    essential = [32, 33, 34, 35, 36, 37, 38,39,40,41,42,43,45,46,47,48,49,50,51,52]
+    essential = [34, 35, 36, 37, 38]
     for es in essential:
         if not es in answer_in:
             answer_out.append(es)
@@ -285,16 +228,14 @@ def nlp():
     substitute = extraInfo["substitute"]
 
     if pet:  # 반려 동물
-        if not (25 in answer_in or 25 in answer_out):
-            answer_out.append(25)
+        if not 77 in answer_in:
+            answer_out.append(77)
     if loan:  # 전세 대출
-        if not (36 in answer_in or 36 in answer_out):
-            answer_out.append(36)
-        if not (46 in answer_in or 46 in answer_out):
-            answer_out.append(46)
+        if not 88 in answer_in:
+            answer_out.append(88)
     if substitute:  # 대리인
-        if not (52 in answer_in or 52 in answer_out):
-            answer_out.append(52)
+        if not 99 in answer_in:
+            answer_out.append(99)
 
     # ✅ 복비 계산
     monthly = extraInfo["monthly"]  # 월세or전세
@@ -443,16 +384,13 @@ def clovaocr_from_image():
     res = requests.post(clova_url, json=requestJson, headers=headers)
     result = res.json()
     infer_texts = [field["inferText"] for field in result["images"][0]["fields"]]
-    processsed_texts = get_cases(infer_texts)
-    data = {'text': processsed_texts, 's3_url':s3_url}
-    return jsonify(data)
-    # return jsonpickle.encode()
+    return jsonpickle.encode(get_cases(infer_texts))
 
 def get_cases(inputlist):
     # 특약사항 부분만 추출
     start_index = inputlist.index('특약사항')
     last_index = len(inputlist) - 1 - inputlist[::-1].index('본')
-    output = inputlist[start_index+1:last_index]
+    output = inputlist[start_index:last_index]
 
     #추출된 원소들을 문장으로 조합
     sentences = []
