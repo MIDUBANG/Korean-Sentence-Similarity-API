@@ -195,21 +195,20 @@ def nlp():
         for g in ask:
             st1 = contents[i]
             st2 = initialData[g[0]][g[1]]
-            #gpt_answer = crossCheckingGPT(st1,st2)
+            gpt_answer = crossCheckingGPT(st1,st2)
 
             print("비교 대상 문장 : ", st2)
             print('답변:',gpt_answer)
 
             if answer_origin:
-                    if not answer_origin[-1] == st1:
+                if not answer_origin[-1] == st1:
                         answer_origin.append(st1)
                         in_set =  {"caseNo" : g[0],"rawCase" :contents[i]}
                         answer_in.append(in_set)
-                else:
-                    answer_origin.append(st1)
-                    in_set =  {"caseNo" : g[0],"rawCase" :contents[i]}
-                    answer_in.append(in_set)
-                
+            else:
+                answer_origin.append(st1)
+                in_set =  {"caseNo" : g[0],"rawCase" :contents[i]}
+                answer_in.append(in_set)
 
     print("최종 결과", answer_in)
 
