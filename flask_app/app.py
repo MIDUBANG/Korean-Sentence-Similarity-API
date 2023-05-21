@@ -227,30 +227,46 @@ def nlp():
         for j in range(len(initialData)):  # 보유 중인 case 개수만큼 돌리기
             min_distance = get_best(j, [contents[i]])  # 케이스별 (케이스 번호, 인덱스, 거리)
             distance_list.append(min_distance)
-
-        # GPT에게 distance_list[:2] 2개에 대해 진짜 가까운 문장이 있는지 물어보기
+    
         distance_list = sorted(distance_list, key=lambda x: x[2])
-        ask = distance_list[:2]
-
-        print("질문:", ask)
-
+        ask = distance_list[0]
 
         for g in ask:
             st1 = contents[i]
             st2 = initialData[g[0]][g[1]]
-            gpt_answer = crossCheckingGPT(st1,st2)
-
-            print("비교 대상 문장 : ", st2)
-            print('답변:',gpt_answer)
-
-            if "Yes" in gpt_answer or "yes" in gpt_answer:
-                if answer_origin:
-                    if not answer_origin[-1] == st1:
-                        answer_origin.append(st1)
-                        answer_in.append(g[0])
-                else:
+            
+            if answer_origin: # 하나라도 들어있음 
+                if not answer_origin[-1] == st1:
                     answer_origin.append(st1)
                     answer_in.append(g[0])
+                    
+                else: # 빈배열이면 걍 넣고
+                    answer_origin.append(st1)
+                    answer_in.append(g[0])
+
+        # GPT에게 distance_list[:2] 2개에 대해 진짜 가까운 문장이 있는지 물어보기
+        # distance_list = sorted(distance_list, key=lambda x: x[2])
+        # ask = distance_list[:2]
+
+        # print("질문:", ask)
+
+
+        # for g in ask:
+        #     st1 = contents[i]
+        #     st2 = initialData[g[0]][g[1]]
+        #     gpt_answer = crossCheckingGPT(st1,st2)
+
+        #     print("비교 대상 문장 : ", st2)
+        #     print('답변:',gpt_answer)
+
+        #     if "Yes" in gpt_answer or "yes" in gpt_answer:
+        #         if answer_origin: # 하나라도 들어있음 
+        #             if not answer_origin[-1] == st1:
+        #                 answer_origin.append(st1)
+        #                 answer_in.append(g[0])
+        #         else: # 빈배열이면 걍 넣고
+        #             answer_origin.append(st1)
+        #             answer_in.append(g[0])
 
     print("최종 결과", answer_in)
 
