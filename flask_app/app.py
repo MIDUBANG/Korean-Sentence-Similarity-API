@@ -247,10 +247,12 @@ def nlp():
             if answer_origin:
                 if not answer_origin[-1] == st1:
                     answer_origin.append(st1)
-                    answer_in.append(g[0])
+                    in_set =  {"caseNo" : g[0],"rawCase" :contents[i]}
+                    answer_in.append(in_set)
             else:
                 answer_origin.append(st1)
-                answer_in.append(g[0])
+                in_set =  {"caseNo" : g[0],"rawCase" :contents[i]}
+                answer_in.append(in_set)
 
     print("최종 결과", answer_in)
 
