@@ -17,13 +17,7 @@ services:
         reservations:
           cpus: '0.0001'
           memory: 20M
-    command: 
-    - |
-      gunicorn -w 1 -b 0.0.0.0:8000 wsgi:app
-      celery -A app.celery worker --loglevel=info
-    depends_on:
-      - redis
-
+    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi:app
   
   nginx:
     container_name: nginx
@@ -40,7 +34,15 @@ services:
     depends_on:
       - flask_app
 
-
+  worker:
+    build:
+      context: ./flask_app
+    command: celery -A app.celery worker --loglevel=info --autoscale=10,3
+    volumes:
+      - .:/home/ubuntu/srv/nlp_clova/flask_app
+    depends_on:
+      - flask_app
+      - redis
     
   redis:
     image: redis:6-alpine
