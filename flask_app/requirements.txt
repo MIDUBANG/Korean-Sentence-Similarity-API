@@ -66,3 +66,4 @@ python-dotenv
 gunicorn
 s3transfer
 openai
+celery
