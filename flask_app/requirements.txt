@@ -66,4 +66,4 @@ python-dotenv
 gunicorn
 s3transfer
 openai
-celery
+celery[redis]
