@@ -290,14 +290,14 @@ def nlp():
             print("비교 대상 문장 : ", st2)
             print('답변:',result)
 
-            if "Yes" in gpt_answer or "yes" in gpt_answer:
-                if answer_origin:
                     if not answer_origin[-1] == st1:
-                        answer_origin.append(st1)
-                        answer_in.append(g[0])
-                else:
                     answer_origin.append(st1)
-                    answer_in.append(g[0])
+                    in_set =  {"caseNo" : g[0],"rawCase" :contents[i]}
+                    answer_in.append(in_set)
+            else:
+                answer_origin.append(st1)
+                in_set =  {"caseNo" : g[0],"rawCase" :contents[i]}
+                answer_in.append(in_set)
 
     print("최종 결과", answer_in)
 
