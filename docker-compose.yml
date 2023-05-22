@@ -17,7 +17,10 @@ services:
         reservations:
           cpus: '0.0001'
           memory: 20M
-    command: sh -c " gunicorn -w 1 -b 0.0.0.0:8000 wsgi:app && celery -A app.celery worker --loglevel=info"
+    command: 
+    - |
+      gunicorn -w 1 -b 0.0.0.0:8000 wsgi:app
+      celery -A app.celery worker --loglevel=info
     depends_on:
       - redis
 

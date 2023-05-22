@@ -58,8 +58,8 @@ S3_LOCATION = f"http://midubang-s3.s3.amazonaws.com/"
 
 
 app.config.update(
-    CELERY_BROKER_URL=f'redis://localhost:6379/',
-    CELERY_RESULT_BACKEND=f'redis://localhost:6379/'
+    CELERY_BROKER_URL=f'redis://redis:6379/',
+    CELERY_RESULT_BACKEND=f'redis://redis:6379/'
 )
 
 celery = make_celery(app)
@@ -287,7 +287,7 @@ def nlp():
             print("비교 대상 문장 : ", st2)
             print('답변:',result)
 
-            if "Yes" in result or "yes" in result:
+            if "Yes" in gpt_answer or "yes" in gpt_answer:
                 if answer_origin:
                     if not answer_origin[-1] == st1:
                         answer_origin.append(st1)
