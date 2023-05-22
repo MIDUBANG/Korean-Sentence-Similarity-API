@@ -36,7 +36,7 @@ services:
 
   worker:
     build: .
-    command: celery -A tasks worker --loglevel=info --autoscale=10,3
+    command: celery -A app worker --loglevel=info --autoscale=10,3
     volumes:
       - .:/home/ubuntu/srv/nlp_clova/flask_app
     depends_on:
