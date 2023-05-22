@@ -18,31 +18,10 @@ import time
 import logging
 import uuid
 import boto3
-from celery import Celery
-import redis
 from dotenv import load_dotenv, find_dotenv
-from tasks import crossCheckingGPT
 
 
 from data import initialDataSet
-
-
-def make_celery(app):
-    celery = Celery(
-        'app',
-        backend=app.config['CELERY_RESULT_BACKEND'],
-        broker=app.config['CELERY_BROKER_URL'],
-    )
-    celery.conf.update(app.config)
-
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
-
-    celery.Task = ContextTask
-    return celery
-
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -54,76 +33,29 @@ load_dotenv()
 AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY")
 AWS_SECRET_KEY= os.environ.get("AWS_SECRET_KEY")
 X_OCR_SECRET= os.environ.get("X_OCR_SECRET")
-REDIS_PW=os.environ.get("REDIS_PW")
-FLASK_API_KEY = os.environ.get("FLASK_API_KEY")
 
 S3_LOCATION = f"http://midubang-s3.s3.amazonaws.com/"
 
 
-app.config.update(
-    CELERY_BROKER_URL=f'redis://:{REDIS_PW}@localhost:6379/',
-    CELERY_RESULT_BACKEND=f'redis://{REDIS_PW}@localhost:6379/'
-)
-
-celery = make_celery(app)
-task_cache = dict()
-
-@celery.task()
-def add_together(a, b):
-    time.sleep(5)
-    return a
-
-@app.route('/adder', methods=['GET'])
-def adder():
-    global task_cache
-    input = request.get_json()
-    a = 'hello'
-    b = 'hi'
-    result = add_together.delay(a, b)
-    answer = result.get()
-    return jsonify({
-        'answer' : answer
-    })
-
-@app.route('/progress', methods=['GET'])
-def progress():
-    global task_cache
-    task_id = request.args.get('task_id')
-    task = task_cache[task_id]
-    return jsonify({
-        'status': task.ready()
-    })
-
-@app.route('/result', methods=['GET'])
-def result():
-    global task_cache
-    input = request.get_json()
-    task_id = input['task_id']
-    task = task_cache[task_id]
-    return jsonify({
-        'result': task.get()
-    })  
-
-@celery.task()
-def crossCheckingGPT(st1, st2):
+def crossCheckingGPT(st1, st2, API_KE=API_KEY):
     # set api key
-    openai.api_key = FLASK_API_KEY
+    openai.api_key = API_KEY
     # Call the chat GPT API
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-        {"role": "system", "content": "You are an LLM (Language Model) that, upon receiving two sentences as input, determines whether they have the same semantic meaning and responds with either 'Yes.' or 'No.'."},
-        {"role": "user", "content": f"Q: For the sentence pair '계약 연장은 계약 만기 3달 전까지 갱신 의사를 밝혀야만 가능하다.' and '계약 만기 5개월 전 까지 재계약 의사를 밝히지 않은 경우, 계약은 만료되는 것으로 간주한다.', do these two sentences have the same semantics?"},
-        {"role": "assistant", "content": "A: First, identify the key differences between the two sentences. Second, consider the impact of the difference in wording. Third, consider the overall meaning of the two sentences. Therefore, given that the two sentences convey the same general idea, despite the difference in wording, we can conclude that they have the same semantics. The answer (yes or no) is: yes."},
-        {"role":"user", "content": f"Q: For the sentence pair '임대인이 사전에 고지하지 않은 체납 사실이 확인된 경우에는 계약을 해지하며, 임차인에게 계약금을 돌려준다.' and '계약 시 임대인이 임차인에게 국세,지방세 체납이나 근저당권 이자 체납이 있는지 알리고, 계약 체결 후에는 임대인이 세무서, 지방자치 등에 이를 확인할 수 있게 한다. 고지하지 않은 체납 사실이 확인되면 계약을 해지한다.', do these two sentences have the same semantics?"},
-        {"role": "assistant", "content": "A: First, identify the key differences between the two sentences. Second, consider the impact of the difference in wording. Third, consider the overall meaning of the two sentences. Therefore, Both sentences share the same semantic meaning, which is that the landlord must inform the tenant in advance about the nonpayment of taxes, and if not done so, terminate the contract. Therefore, we can conclude that the two sentences have the same semantic. The answer (yes or no) is: yes."},
-        {"role": "user", "content": f"Q: For the sentence pair '다음 임차인이 구해지면 보증금을 반환한다.' and '세입자가 구해질 때 까지 보증금을 반환하지 못한다.', do these two sentences have the same semantics?"},
-        {"role": "assistant", "content": "A: First, identify the key differences between the two sentences. Second, consider the impact of the difference in wording. Third, consider the overall meaning of the two sentences. Therefore, Both sentences share the same semantic meaning, which is that the security deposit will not be refunded until the next tenant is found, but it will be returned once the next tenant is secured. Therefore, we can conclude that the two sentences have the same semantics. The answer (yes or no) is: yes."},
-        {"role": "user", "content": f"Q: For the sentence pair {st1} and {st2}, do these two sentences have the same semantics? The answer (yes or no) is: ____"}
+         {"role": "system", "content": "You are an LLM (Language Model) that, upon receiving two sentences as input, determines whether they have the same semantic meaning and responds with either 'Yes.' or 'No.'."},
+         {"role": "user", "content": f"Q: For the sentence pair '계약 연장은 계약 만기 3달 전까지 갱신 의사를 밝혀야만 가능하다.' and '계약 만기 5개월 전 까지 재계약 의사를 밝히지 않은 경우, 계약은 만료되는 것으로 간주한다.', do these two sentences have the same semantics?"},
+         {"role": "assistant", "content": "A: First, identify the key differences between the two sentences. Second, consider the impact of the difference in wording. Third, consider the overall meaning of the two sentences. Therefore, given that the two sentences convey the same general idea, despite the difference in wording, we can conclude that they have the same semantics. The answer (yes or no) is: yes."},
+         {"role":"user", "content": f"Q: For the sentence pair '임대인이 사전에 고지하지 않은 체납 사실이 확인된 경우에는 계약을 해지하며, 임차인에게 계약금을 돌려준다.' and '계약 시 임대인이 임차인에게 국세,지방세 체납이나 근저당권 이자 체납이 있는지 알리고, 계약 체결 후에는 임대인이 세무서, 지방자치 등에 이를 확인할 수 있게 한다. 고지하지 않은 체납 사실이 확인되면 계약을 해지한다.', do these two sentences have the same semantics?"},
+         {"role": "assistant", "content": "A: First, identify the key differences between the two sentences. Second, consider the impact of the difference in wording. Third, consider the overall meaning of the two sentences. Therefore, Both sentences share the same semantic meaning, which is that the landlord must inform the tenant in advance about the nonpayment of taxes, and if not done so, terminate the contract. Therefore, we can conclude that the two sentences have the same semantic. The answer (yes or no) is: yes."},
+         {"role": "user", "content": f"Q: For the sentence pair '다음 임차인이 구해지면 보증금을 반환한다.' and '세입자가 구해질 때 까지 보증금을 반환하지 못한다.', do these two sentences have the same semantics?"},
+         {"role": "assistant", "content": "A: First, identify the key differences between the two sentences. Second, consider the impact of the difference in wording. Third, consider the overall meaning of the two sentences. Therefore, Both sentences share the same semantic meaning, which is that the security deposit will not be refunded until the next tenant is found, but it will be returned once the next tenant is secured. Therefore, we can conclude that the two sentences have the same semantics. The answer (yes or no) is: yes."},
+         {"role": "user", "content": f"Q: For the sentence pair {st1} and {st2}, do these two sentences have the same semantics? The answer (yes or no) is: ____"}
         ],
         temperature=0,
     )
-    return completion["choices"][0]["message"]["content"]
+    return completion["choices"][0]["message"]["content"].encode("utf-8").decode()
 
 def crossCheckingWithoutCoT(st1, st2, API_KE=API_KEY):
     # set api key
@@ -142,7 +74,7 @@ def crossCheckingWithoutCoT(st1, st2, API_KE=API_KEY):
 
 def summaryGPT(prompt):
     # set api key
-    openai.api_key = FLASK_API_KEY
+    openai.api_key = API_KEY
     # Call the chat GPT API
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -246,12 +178,38 @@ def get_best(case_num, input):
 
     return min_value
 
+# @app.route("/api/gpttest", methods=["POST"])
+# def gpt_test():
+#     input = request.get_json()
+#     st1 = input['st1']
+#     st2 = input['st2']
+#     gpt_answer = crossCheckingGPT(st1,st2,API_KEY)
+#     gpt_answer2 = crossCheckingWithoutCoT(st1, st2, API_KEY)
+    
+#     print("------------------------------------------")
+#     print("CoT를 적용하지 않은 프롬프팅")
+#     print("------------------------------------------")
+
+#     print('문장1:', st1)
+#     print('문장2:', st2)
+#     print('답변:',gpt_answer2)
+
+#     print("------------------------------------------")
+#     print("CoT를 적용한 프롬프팅")
+#     print("------------------------------------------")
+#     print('문장1:', st1)
+#     print('문장2:', st2)
+#     print('답변:',gpt_answer)
+
+#     return jsonify({
+#         'gpt_answer' : gpt_answer
+#     })
+
+
 
 @app.route("/api/nlp", methods=["POST"])
 def nlp():
     chatapi_request_num = 0
-    global task_cache
-
 
     input = request.get_json()
     contents = input["contents"]
@@ -279,18 +237,13 @@ def nlp():
 
         for g in ask:
             st1 = contents[i]
-
             st2 = initialData[g[0]][g[1]]
-
-            st_list = [st1, st2]
-            gpt_answer = crossCheckingGPT.delay(st1,st2)
-            result = gpt_answer.get()
-            print(result)
+            gpt_answer = crossCheckingGPT(st1,st2)
 
             print("비교 대상 문장 : ", st2)
-            print('답변:',result)
+            print('답변:',gpt_answer)
 
-            if "Yes" in result or "yes" in result:
+            if "Yes" in gpt_answer or "yes" in gpt_answer:
                 if answer_origin:
                     if not answer_origin[-1] == st1:
                         answer_origin.append(st1)
