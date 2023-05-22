@@ -19,9 +19,7 @@ import logging
 import uuid
 import boto3
 from celery import Celery
-import redis
 from dotenv import load_dotenv, find_dotenv
-from tasks import crossCheckingGPT
 
 
 from data import initialDataSet
@@ -61,8 +59,8 @@ S3_LOCATION = f"http://midubang-s3.s3.amazonaws.com/"
 
 
 app.config.update(
-    CELERY_BROKER_URL=f'redis://:{REDIS_PW}@localhost:6379/',
-    CELERY_RESULT_BACKEND=f'redis://{REDIS_PW}@localhost:6379/'
+    CELERY_BROKER_URL=f'redis://:{REDIS_PW}localhost:6379/',
+    CELERY_RESULT_BACKEND=f'redis://:{REDIS_PW}@localhost:6379/'
 )
 
 celery = make_celery(app)
