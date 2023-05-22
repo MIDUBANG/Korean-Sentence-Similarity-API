@@ -52,7 +52,6 @@ load_dotenv()
 AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY")
 AWS_SECRET_KEY= os.environ.get("AWS_SECRET_KEY")
 X_OCR_SECRET= os.environ.get("X_OCR_SECRET")
-REDIS_PW=os.environ.get("REDIS_PW")
 FLASK_API_KEY = os.environ.get("FLASK_API_KEY")
 
 S3_LOCATION = f"http://midubang-s3.s3.amazonaws.com/"
