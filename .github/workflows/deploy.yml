@@ -18,13 +18,11 @@ jobs:
         echo "AWS_ACCESS_KEY=$AWS_ACCESS_KEY" >> .env
         echo "AWS_SECRET_KEY=$AWS_SECRET_KEY" >> .env
         echo "X_OCR_SECRET=$X_OCR_SECRET" >> .env
-        echo "REDIS_PW=$REDIS_PW" >> .env
       env:
         FLASK_API_KEY: ${{ secrets.FLASK_API_KEY }}
         AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
         X_OCR_SECRET: ${{ secrets.X_OCR_SECRET }}
-        REDIS_PW: ${{ secrets.REDIS_PW }}
         
     # ec2에서 기존 디렉토리 삭제 & 새로운 디렉토리 생성
     - name: remove existing directory on server & create new remote directory

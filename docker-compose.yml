@@ -33,5 +33,16 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - flask_app
+
+  worker:
+    build: .
+    command: celery -A tasks worker --loglevel=info --autoscale=10,3
+    volumes:
+      - .:/home/ubuntu/srv/nlp_clova/flask_app
+    depends_on:
+      - flask_app
+      - redis
     
+  redis:
+    image: redis:6-alpine
 
