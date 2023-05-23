@@ -306,9 +306,12 @@ def nlp():
         scale = lumpSumMoney
 
     # 2) 거래금액에 따른 상한요율 rate, 한도액 limit 계산
-    if officetel: # 오피스텔인 경우
-        rate = 0.4 # 최대 0.4퍼 내에서 협의
+    if officetel == "OFFICETEL" : # 오피스텔인 경우
+        rate = 0.004 # 최대 0.4퍼 내에서 협의
         limit = float("inf")
+    else if officetel == "NON_HOUSE" : # 주택 외
+        rate = 0.009
+        limit = float('inf')
     else: # 주택인 경우 
         if scale < 50000000:  # 5천만원 미만 / 0.5 (rate) / 20만(limit)
             rate = 0.005
