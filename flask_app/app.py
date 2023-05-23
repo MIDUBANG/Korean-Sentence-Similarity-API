@@ -283,7 +283,8 @@ def nlp():
             answer_out.append(52)
 
     # ✅ 복비 계산
-    monthly = extraInfo["monthly"]  # 월세or전세
+    monthly = extraInfo["monthly"]  # 월세or전세        
+    officetel = extraInfo["officetel"]  # 오피스텔 or 주택
     commission = extraInfo["commission"]  # 복비
     deposit = extraInfo["deposit"]  # 월세 - 보증금
     monthlyMoney = extraInfo["monthlyMoney"]  # 월세
@@ -305,24 +306,28 @@ def nlp():
         scale = lumpSumMoney
 
     # 2) 거래금액에 따른 상한요율 rate, 한도액 limit 계산
-    if scale < 50000000:  # 5천만원 미만 / 0.5 (rate) / 20만(limit)
-        rate = 0.005
-        limit = 200000
-    elif scale < 100000000:  # 5천 이상, 1억 미만 / 0.4 / 30만
-        rate = 0.004
-        limit = 300000
-    elif scale < 600000000:  # 1억 이상, 6억 미만 / 0.3 / 없음
-        rate = 0.003
+    if officetel: # 오피스텔인 경우
+        rate = 0.4 # 최대 0.4퍼 내에서 협의
         limit = float("inf")
-    elif scale < 1200000000:  # 6억 이상, 12억 미만 / 0.4 / 없음
-        rate = 0.004
-        limit = float("inf")
-    elif scale < 1500000000:  # # 1억 이상, 6억 미만 / 0.5 / 없음
-        rate = 0.005
-        limit = float("inf")
-    else:  # 1억 이상, 6억 미만 / 0.6 / 없음
-        rate = 0.006
-        limit = float("inf")
+    else: # 주택인 경우 
+        if scale < 50000000:  # 5천만원 미만 / 0.5 (rate) / 20만(limit)
+            rate = 0.005
+            limit = 200000
+        elif scale < 100000000:  # 5천 이상, 1억 미만 / 0.4 / 30만
+            rate = 0.004
+            limit = 300000
+        elif scale < 600000000:  # 1억 이상, 6억 미만 / 0.3 / 없음
+            rate = 0.003
+            limit = float("inf")
+        elif scale < 1200000000:  # 6억 이상, 12억 미만 / 0.4 / 없음
+            rate = 0.004
+            limit = float("inf")
+        elif scale < 1500000000:  # # 1억 이상, 6억 미만 / 0.5 / 없음
+            rate = 0.005
+            limit = float("inf")
+        else:  # 1억 이상, 6억 미만 / 0.6 / 없음
+            rate = 0.006
+            limit = float("inf")
 
     # 3) 최대 복비 계산
     answer_commission = scale * rate
