@@ -17,7 +17,7 @@ services:
         reservations:
           cpus: '0.0001'
           memory: 20M
-    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi:app
+    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi:app --timeout 120
   
   nginx:
     container_name: nginx

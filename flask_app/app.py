@@ -309,7 +309,7 @@ def nlp():
     if officetel == "OFFICETEL" : # 오피스텔인 경우
         rate = 0.004 # 최대 0.4퍼 내에서 협의
         limit = float("inf")
-    else if officetel == "NON_HOUSE" : # 주택 외
+    elif officetel == "NON_HOUSE" : # 주택 외
         rate = 0.009
         limit = float('inf')
     else: # 주택인 경우 
