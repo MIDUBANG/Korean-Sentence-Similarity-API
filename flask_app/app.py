@@ -210,6 +210,7 @@ def gpt_test():
 @app.route("/api/nlp", methods=["POST"])
 def nlp():
     chatapi_request_num = 0
+    print("----request started------")
 
     input = request.get_json()
     contents = input["contents"]
@@ -340,6 +341,8 @@ def nlp():
     # 4) 바가지 당첨
     if answer_commission < commission:
         is_expensive = True
+    
+    print("----request done------")
 
     return jsonify(
         {
@@ -441,6 +444,12 @@ def clovaocr_from_image():
     data = {'text': processsed_texts, 's3_url':s3_url}
     return jsonify(data)
     # return jsonpickle.encode()
+
+@app.route("/health", methods=["GET"])
+def health():
+    return "OK", 200
+
+
 
 def get_cases(inputlist):
     # 특약사항 부분만 추출
