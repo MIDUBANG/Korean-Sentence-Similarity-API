@@ -298,7 +298,7 @@ def nlp():
     is_expensive = False
 
     # 1) 거래금액 Scale 계산하기
-    if monthly:  # 월세
+    if monthly == "MONTHLY_RENT" or monthly == "HALF_JEONSE":  # 월세
         if deposit + monthlyMoney * 100 <= 50000000:  # 5천만원 이하면
             scale = deposit + monthlyMoney * 70
         else:
